@@ -28,7 +28,7 @@ func main() {
 	router.GET("/errors", getErrors)
 	router.DELETE("/errors", clearBuffer)
 
-	router.Run("")
+	router.Run(":8080")
 }
 
 func postDevice(context *gin.Context) {
