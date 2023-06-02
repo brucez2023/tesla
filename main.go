@@ -69,10 +69,8 @@ func postDevice(context *gin.Context) {
 		return
 	}
 
-	// Not sure why this is the case, but depending on terminal or postman tool to call the curl command it can ignore the single quotes
-	// Because of this have to hand the case of where there is either a single quote or no single quote.
 	// Third part needs to check if the string is 'Temperature'
-	if !(parts[2] == "Temperature" || parts[2] == "'Temperature'") {
+	if parts[2] != "'Temperature'" {
 		errors = append(errors, jsonBody.Data)
 		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "bad request"})
 		return
