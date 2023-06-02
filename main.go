@@ -37,6 +37,7 @@ func postDevice(context *gin.Context) {
 	var err error
 	var jsonBody inputBody
 
+	// Parse the body to JSON
 	err = context.BindJSON(&jsonBody)
 	if err != nil {
 		errors = append(errors, jsonBody.Data)
@@ -44,6 +45,7 @@ func postDevice(context *gin.Context) {
 		return
 	}
 
+	// Use the delimiter of : to split up the body it should have 4 parts
 	parts := strings.Split(jsonBody.Data, ":")
 	if len(parts) != 4 {
 		errors = append(errors, jsonBody.Data)
@@ -51,6 +53,7 @@ func postDevice(context *gin.Context) {
 		return
 	}
 	
+	// First check if we can cover the first part into integer
 	newDevice.deviceId, err = strconv.Atoi(parts[0])
 	if err != nil {
 		errors = append(errors, jsonBody.Data)
@@ -58,6 +61,7 @@ func postDevice(context *gin.Context) {
 		return
 	}
 
+	// Second part needs to be checked if we can convert into 64bit integer
 	newDevice.time, err = strconv.ParseInt(parts[1], 10, 64)
 	if err != nil {
 		errors = append(errors, jsonBody.Data)
@@ -65,12 +69,16 @@ func postDevice(context *gin.Context) {
 		return
 	}
 
-	if parts[2] != "Temperature" {
+	// Not sure why this is the case, but depending on terminal or postman tool to call the curl command it can ignore the single quotes
+	// Because of this have to hand the case of where there is either a single quote or no single quote.
+	// Third part needs to check if the string is 'Temperature'
+	if !(parts[2] == "Temperature" || parts[2] == "\'Temperature\'") {
 		errors = append(errors, jsonBody.Data)
 		context.IndentedJSON(http.StatusBadRequest, gin.H{"error": "bad request"})
 		return
 	}
 
+	// Fourth Part needs to make sure it's a 64bit float
 	newDevice.temperature, err = strconv.ParseFloat(parts[3], 64)
 	if err != nil {
 		errors = append(errors, jsonBody.Data)
@@ -82,6 +90,7 @@ func postDevice(context *gin.Context) {
 
 }
 
+// tempFormat formats the json properly back
 func tempFormat(context *gin.Context, d device) {
 	if d.temperature >= 90 {
 		context.IndentedJSON(http.StatusOK,
